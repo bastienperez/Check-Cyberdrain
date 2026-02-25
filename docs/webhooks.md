@@ -9,6 +9,7 @@ Configure a single generic webhook that can receive multiple event types:
   "genericWebhook": {
     "enabled": true,
     "url": "https://webhook.example.com/endpoint",
+    "format": "json",
     "events": [
       "detection_alert",
       "false_positive_report",
@@ -18,6 +19,14 @@ Configure a single generic webhook that can receive multiple event types:
   }
 }
 ```
+
+### Supported Formats
+
+- **`json`** (default): Standard JSON payload for custom integrations
+- **`slack`**: Formatted for Slack using Block Kit with rich formatting
+- **`teams`**: Formatted for Microsoft Teams using Adaptive Cards
+
+For detailed format documentation and examples, see [webhook-formatting.md](webhook-formatting.md).
 
 CIPP reporting uses separate dedicated settings:
 

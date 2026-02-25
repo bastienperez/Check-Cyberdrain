@@ -1,8 +1,10 @@
 import logger from "../utils/logger.js";
+import { WebhookFormatters } from "./webhook-formatters.js";
 
 export class WebhookManager {
   constructor(configManager) {
     this.configManager = configManager;
+    this.formatters = new WebhookFormatters();
     this.webhookTypes = {
       DETECTION_ALERT: "detection_alert",
       FALSE_POSITIVE: "false_positive_report",
@@ -37,7 +39,8 @@ export class WebhookManager {
         return {
           url: genericWebhook.url,
           enabled: true,
-          type: "generic"
+          type: "generic",
+          format: genericWebhook.format || "json"
         };
       }
     }
@@ -246,19 +249,46 @@ export class WebhookManager {
       };
     }
 
-    const payload = webhookConfig.type === "cipp" ?
-      this.buildCippPayload(data, metadata) :
-      this.buildPayload(webhookType, data, metadata);
+    let payload;
+    let contentType = "application/json";
+
+    if (webhookConfig.type === "cipp") {
+      payload = this.buildCippPayload(data, metadata);
+    } else {
+      // Build the base payload
+      const basePayload = this.buildPayload(webhookType, data, metadata);
+      
+      // Apply formatting based on webhook format
+      switch (webhookConfig.format) {
+        case "slack":
+          payload = this.formatters.formatSlack(webhookType, basePayload);
+          break;
+        case "teams":
+          payload = this.formatters.formatTeams(webhookType, basePayload);
+          break;
+        case "json":
+        default:
+          payload = basePayload;
+          break;
+      }
+    }
 
     try {
+      const headers = {
+        "Content-Type": contentType,
+        "User-Agent": `Check/${metadata.extensionVersion || chrome.runtime.getManifest().version}`,
+        "X-Webhook-Type": webhookType,
+        "X-Webhook-Version": "1.0"
+      };
+
+      // Add specific headers for Teams webhooks
+      if (webhookConfig.format === "teams") {
+        headers["Content-Type"] = "application/json";
+      }
+
       const response = await fetch(webhookConfig.url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": `Check/${metadata.extensionVersion || chrome.runtime.getManifest().version}`,
-          "X-Webhook-Type": webhookType,
-          "X-Webhook-Version": "1.0"
-        },
+        headers: headers,
         body: JSON.stringify(payload)
       });
 
@@ -266,18 +296,20 @@ export class WebhookManager {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      logger.log(`Webhook sent successfully: ${webhookType}`);
+      logger.log(`Webhook sent successfully: ${webhookType} (format: ${webhookConfig.format || 'json'})`);
       return {
         success: true,
         status: response.status,
-        webhookType: webhookType
+        webhookType: webhookType,
+        format: webhookConfig.format || 'json'
       };
     } catch (error) {
       logger.error(`Failed to send webhook ${webhookType}:`, error.message);
       return {
         success: false,
         error: error.message,
-        webhookType: webhookType
+        webhookType: webhookType,
+        format: webhookConfig.format || 'json'
       };
     }
   }

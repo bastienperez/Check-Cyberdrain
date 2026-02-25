@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webhook Format Testing - Check Extension</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #2563eb;
+      margin-bottom: 10px;
+    }
+    
+    .description {
+      color: #64748b;
+      margin-bottom: 30px;
+    }
+    
+    .format-section {
+      margin-bottom: 40px;
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    
+    .format-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #1e293b;
+    }
+    
+    .test-button {
+      background: #f77f00;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .test-button:hover {
+      background: #d66a00;
+    }
+    
+    .config-example {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+      overflow-x: auto;
+    }
+    
+    .config-example code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+    
+    .sample-output {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .sample-output pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font-size: 0.85rem;
+    }
+    
+    .warning {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    
+    .warning-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 5px;
+    }
+    
+    .status {
+      padding: 10px;
+      border-radius: 6px;
+      margin: 15px 0;
+      font-weight: 500;
+    }
+    
+    .status.success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #22c55e;
+    }
+    
+    .status.error {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #ef4444;
+    }
+    
+    .url-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+    }
+    
+    label {
+      font-weight: 500;
+      color: #374151;
+      display: block;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔗 Webhook Format Testing</h1>
+    <p class="description">
+      Test different webhook formats for the Check Extension. This page simulates webhook payloads 
+      and shows you how they would appear in Slack, Microsoft Teams, or as JSON.
+    </p>
+
+    <div class="warning">
+      <div class="warning-title">⚠️ Testing Note</div>
+      This page generates sample webhook payloads based on the actual extension data structure. 
+      Use these examples to test your webhook endpoints before deploying the extension.
+    </div>
+
+    <div class="format-section" style="background: #f0f9ff; border: 1px solid #0ea5e9;">
+      <div class="format-title">🔧 Configuration Instructions</div>
+      <p>To configure webhook formatting in your extension:</p>
+      <ol style="margin: 15px 0; padding-left: 20px;">
+        <li>Open the extension options page (click the extension icon → Options)</li>
+        <li>Go to <strong>General Settings</strong> section</li>
+        <li>Find the <strong>Webhook Notifications</strong> configuration</li>
+        <li>Set your webhook URL and choose the format:
+          <ul style="margin-top: 8px;">
+            <li><strong>JSON</strong> - Raw structured data for custom integrations</li>
+            <li><strong>Slack Block Kit</strong> - Rich formatted cards for Slack channels</li>
+            <li><strong>Microsoft Teams Adaptive Cards</strong> - Formatted cards for Teams channels</li>
+          </ul>
+        </li>
+        <li>Select which event types to send (Page Blocked, Detection Alert, etc.)</li>
+        <li>Save settings</li>
+      </ol>
+    </div>
+
+    <!-- JSON Format Section -->
+    <div class="format-section">
+      <div class="format-title">📄 JSON Format (Default)</div>
+      <p>Standard structured JSON payload for custom integrations.</p>
+      
+      <div class="config-example">
+        <code>
+{
+  "genericWebhook": {
+    "enabled": true,
+    "url": "https://api.example.com/webhooks",
+    "format": "json",
+    "events": ["page_blocked", "detection_alert"]
+  }
+}
+        </code>
+      </div>
+      
+      <button class="test-button" onclick="generateSample('json', 'page_blocked')">Test Page Blocked</button>
+      <button class="test-button" onclick="generateSample('json', 'detection_alert')">Test Detection Alert</button>
+      <button class="test-button" onclick="generateSample('json', 'rogue_app_detected')">Test Rogue App</button>
+      
+      <div id="json-output" class="sample-output" style="display: none;">
+        <pre id="json-content"></pre>
+      </div>
+    </div>
+
+    <!-- Slack Format Section -->
+    <div class="format-section">
+      <div class="format-title">💬 Slack Format</div>
+      <p>Rich formatted messages using Slack Block Kit with colors, fields, and actions.</p>
+      
+      <div class="config-example">
+        <code>
+{
+  "genericWebhook": {
+    "enabled": true,
+    "url": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK",
+    "format": "slack",
+    "events": ["page_blocked", "detection_alert", "rogue_app_detected"]
+  }
+}
+        </code>
+      </div>
+      
+      <button class="test-button" onclick="generateSample('slack', 'page_blocked')">Test Page Blocked</button>
+      <button class="test-button" onclick="generateSample('slack', 'detection_alert')">Test Detection Alert</button>
+      <button class="test-button" onclick="generateSample('slack', 'rogue_app_detected')">Test Rogue App</button>
+      
+      <div id="slack-output" class="sample-output" style="display: none;">
+        <pre id="slack-content"></pre>
+      </div>
+    </div>
+
+    <!-- Teams Format Section -->
+    <div class="format-section">
+      <div class="format-title">🟦 Microsoft Teams Format</div>
+      <p>Adaptive Cards for Microsoft Teams with structured facts and actions.</p>
+      
+      <div class="config-example">
+        <code>
+{
+  "genericWebhook": {
+    "enabled": true,
+    "url": "https://outlook.office.com/webhook/YOUR/TEAMS/WEBHOOK",
+    "format": "teams",
+    "events": ["page_blocked", "detection_alert", "rogue_app_detected"]
+  }
+}
+        </code>
+      </div>
+      
+      <button class="test-button" onclick="generateSample('teams', 'page_blocked')">Test Page Blocked</button>
+      <button class="test-button" onclick="generateSample('teams', 'detection_alert')">Test Detection Alert</button>
+      <button class="test-button" onclick="generateSample('teams', 'rogue_app_detected')">Test Rogue App</button>
+      
+      <div id="teams-output" class="sample-output" style="display: none;">
+        <pre id="teams-content"></pre>
+      </div>
+    </div>
+
+    <!-- Webhook URL Tester -->
+    <div class="format-section">
+      <div class="format-title">🧪 Live Webhook Tester</div>
+      <p>Send test webhooks to your actual webhook URL.</p>
+      
+      <label for="webhook-url">Webhook URL:</label>
+      <input type="url" id="webhook-url" class="url-input" 
+             placeholder="https://webhook.site/your-unique-url">
+      
+      <label for="webhook-format">Format:</label>
+      <select id="webhook-format" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; margin: 10px 0;">
+        <option value="json">JSON</option>
+        <option value="slack">Slack</option>
+        <option value="teams">Microsoft Teams</option>
+      </select>
+      
+      <br>
+      <button class="test-button" onclick="sendTestWebhook('page_blocked')">Send Page Blocked</button>
+      <button class="test-button" onclick="sendTestWebhook('detection_alert')">Send Detection Alert</button>
+      <button class="test-button" onclick="sendTestWebhook('rogue_app_detected')">Send Rogue App</button>
+      
+      <div id="webhook-status"></div>
+    </div>
+  </div>
+
+  <script>
+    // Sample data generators
+    const sampleData = {
+      page_blocked: {
+        url: "https://fake-microsoft-login.phishing-site.com/signin",
+        severity: "critical",
+        score: 30,
+        threshold: 85,
+        reason: "Low legitimacy score: -25/85, phishing indicators: 4",
+        detectionMethod: "rules_engine",
+        rule: {
+          id: "Detect urlMsaSignUp presence in page code",
+          type: "content",
+          description: "Detect urlMsaSignUp presence in page code",
+          weight: 15
+        },
+        ruleDescription: {
+          id: "Detect urlMsaSignUp presence in page code",
+          type: "content", 
+          description: "Detect urlMsaSignUp presence in page code",
+          weight: 15
+        },
+        category: "phishing",
+        action: "blocked",
+        context: {
+          referrer: null,
+          pageTitle: "Microsoft Account | Sign In",
+          domain: "fake-microsoft-login.phishing-site.com",
+          redirectTo: null
+        }
+      },
+      detection_alert: {
+        url: "https://suspicious-office365.com/login",
+        severity: "high",
+        score: 65,
+        threshold: 85,
+        reason: "Multiple phishing indicators detected",
+        detectionMethod: "rules_engine",
+        rule: "suspicious-domain-rule",
+        ruleDescription: "Domain mimics legitimate Microsoft services",
+        category: "phishing",
+        confidence: 0.9,
+        matchedRules: ["domain-similarity", "form-analysis"],
+        context: {
+          referrer: "https://email-client.com",
+          pageTitle: "Office 365 Login",
+          domain: "suspicious-office365.com",
+          redirectTo: null
+        }
+      },
+      rogue_app_detected: {
+        url: "https://login.microsoftonline.com/common/oauth2/authorize?client_id=malicious-app",
+        severity: "critical",
+        reason: "Rogue OAuth application detected",
+        detectionMethod: "rogue_app_detection", 
+        category: "oauth_threat",
+        clientId: "12345678-1234-1234-1234-123456789abc",
+        appName: "Suspicious Data Harvester",
+        appInfo: {
+          description: "Known malicious OAuth application",
+          tags: ["BEC", "exfiltration"],
+          references: ["https://security-blog.example.com/rogue-app-alert"],
+          risk: "high"
+        },
+        context: {
+          referrer: null,
+          pageTitle: null,
+          domain: "login.microsoftonline.com",
+          redirectTo: "https://malicious-redirect.com/collect",
+          isLocalhost: false,
+          isPrivateIP: false
+        }
+      }
+    };
+
+    const basePayload = {
+      version: "1.0",
+      timestamp: new Date().toISOString(),
+      source: "Check Extension",
+      extensionVersion: "1.0.7",
+      user: {
+        email: "user@example.com",
+        id: "user-id-123",
+        accountType: "work-school",
+        provider: "microsoft",
+        isManaged: true,
+        profileId: "profile-123"
+      }
+    };
+
+    // Simplified formatters (client-side version)
+    const formatters = {
+      json: (type, data) => {
+        return {
+          ...basePayload,
+          type: type,
+          data: data
+        };
+      },
+      
+      slack: (type, data) => {
+        const severity = data.severity || "medium";
+        const severityColors = {
+          critical: "#DC2626",
+          high: "#EA580C", 
+          medium: "#F59E0B",
+          low: "#10B981",
+          info: "#3B82F6"
+        };
+        
+        const severityEmojis = {
+          critical: "🚨",
+          high: "⚠️",
+          medium: "⚡", 
+          low: "ℹ️",
+          info: "💡"
+        };
+        
+        const eventTitles = {
+          detection_alert: "Phishing Detection Alert",
+          page_blocked: "Malicious Page Blocked",
+          rogue_app_detected: "Rogue OAuth Application Detected"
+        };
+        
+        const title = severity === "critical" ? 
+          `CRITICAL: ${eventTitles[type]}` :
+          severity === "high" ?
+          `HIGH RISK: ${eventTitles[type]}` :
+          eventTitles[type];
+          
+        const fields = [];
+        
+        if (data.url) {
+          fields.push({
+            type: "mrkdwn",
+            text: `*URL:*\n<${data.url}|${data.url.replace('https://', '').substring(0, 50)}...>`
+          });
+        }
+        
+        if (data.severity) {
+          let severityText = `*Severity:* ${data.severity.toUpperCase()}`;
+          if (data.score !== undefined && data.threshold !== undefined) {
+            severityText += `\n*Score:* ${data.score}/${data.threshold}`;
+          }
+          fields.push({
+            type: "mrkdwn",
+            text: severityText
+          });
+        }
+        
+        return {
+          attachments: [
+            {
+              color: severityColors[severity],
+              blocks: [
+                {
+                  type: "header",
+                  text: {
+                    type: "plain_text",
+                    text: `${severityEmojis[severity]} ${title}`
+                  }
+                },
+                {
+                  type: "section",
+                  fields: fields
+                }
+              ],
+              footer: `Check Extension v${basePayload.extensionVersion}`,
+              ts: Math.floor(new Date(basePayload.timestamp).getTime() / 1000)
+            }
+          ]
+        };
+      },
+      
+      teams: (type, data) => {
+        const severity = data.severity || "medium";
+        const severityEmojis = {
+          critical: "🚨",
+          high: "⚠️",
+          medium: "⚡", 
+          low: "ℹ️",
+          info: "💡"
+        };
+        
+        const eventTitles = {
+          detection_alert: "Phishing Detection Alert",
+          page_blocked: "Malicious Page Blocked", 
+          rogue_app_detected: "Rogue OAuth Application Detected"
+        };
+        
+        const title = severity === "critical" ? 
+          `CRITICAL: ${eventTitles[type]}` :
+          severity === "high" ?
+          `HIGH RISK: ${eventTitles[type]}` :
+          eventTitles[type];
+
+        const getTeamsColor = (sev) => {
+          const colorMap = {
+            critical: "Attention",
+            high: "Warning", 
+            medium: "Accent",
+            low: "Good",
+            info: "Default"
+          };
+          return colorMap[sev?.toLowerCase()] || "Default";
+        };
+
+        const bodyElements = [];
+
+        // Header with title and status
+        bodyElements.push({
+          type: "ColumnSet",
+          columns: [
+            {
+              type: "Column",
+              width: "stretch",
+              items: [
+                {
+                  type: "TextBlock",
+                  text: title,
+                  size: "Large",
+                  weight: "Bolder",
+                  wrap: true
+                }
+              ],
+              verticalContentAlignment: "Center"
+            },
+            {
+              type: "Column",
+              targetWidth: "AtLeast:Standard",
+              width: "auto",
+              items: [
+                {
+                  type: "TextBlock",
+                  text: "Status",
+                  wrap: true,
+                  size: "Small",
+                  weight: "Default",
+                  isSubtle: true
+                },
+                {
+                  type: "TextBlock",
+                  text: "Blocked",
+                  color: "Attention",
+                  spacing: "None",
+                  size: "Small",
+                  weight: "Bolder",
+                  wrap: true
+                }
+              ],
+              spacing: "Small"
+            },
+            {
+              type: "Column",
+              targetWidth: "AtLeast:Standard",
+              width: "auto",
+              separator: true,
+              items: [
+                {
+                  type: "TextBlock",
+                  text: "Threat Score",
+                  size: "Small",
+                  weight: "Default",
+                  isSubtle: true,
+                  wrap: true
+                },
+                {
+                  type: "TextBlock",
+                  text: data.score !== undefined && data.threshold !== undefined ? 
+                    `${data.score}/${data.threshold}` : "N/A",
+                  wrap: true,
+                  weight: "Bolder",
+                  spacing: "None",
+                  size: "Small",
+                  color: getTeamsColor(severity)
+                }
+              ]
+            }
+          ]
+        });
+
+        // Alert type and timestamp
+        bodyElements.push({
+          type: "TextBlock",
+          text: "Security Alert",
+          wrap: true,
+          isSubtle: true,
+          spacing: "None"
+        });
+
+        bodyElements.push({
+          type: "TextBlock",
+          text: `Detected: ${new Date(basePayload.timestamp).toLocaleString()}`,
+          color: getTeamsColor(severity),
+          weight: "Bolder",
+          wrap: true,
+          spacing: "None"
+        });
+
+        // Main details table
+        const tableRows = [];
+
+        // URL row
+        if (data.url) {
+          tableRows.push({
+            type: "TableRow",
+            cells: [
+              {
+                type: "TableCell",
+                items: [
+                  {
+                    type: "TextBlock",
+                    text: "Blocked URL",
+                    wrap: true,
+                    isSubtle: true
+                  }
+                ]
+              },
+              {
+                type: "TableCell",
+                items: [
+                  {
+                    type: "TextBlock",
+                    text: data.url.substring(0, 60),
+                    wrap: true,
+                    fontType: "Monospace"
+                  }
+                ]
+              }
+            ],
+            verticalCellContentAlignment: "Center"
+          });
+        }
+
+        // Severity row
+        tableRows.push({
+          type: "TableRow",
+          cells: [
+            {
+              type: "TableCell",
+              items: [
+                {
+                  type: "TextBlock",
+                  text: "Severity Level",
+                  wrap: true,
+                  isSubtle: true
+                }
+              ]
+            },
+            {
+              type: "TableCell",
+              items: [
+                {
+                  type: "TextBlock",
+                  text: `${severityEmojis[severity]} ${data.severity?.toUpperCase() || 'UNKNOWN'}`,
+                  wrap: true,
+                  color: getTeamsColor(severity),
+                  weight: "Bolder"
+                }
+              ]
+            }
+          ],
+          verticalCellContentAlignment: "Center"
+        });
+
+        // User row
+        tableRows.push({
+          type: "TableRow",
+          cells: [
+            {
+              type: "TableCell",
+              items: [
+                {
+                  type: "TextBlock",
+                  text: "Affected User",
+                  wrap: true,
+                  isSubtle: true
+                }
+              ]
+            },
+            {
+              type: "TableCell",
+              items: [
+                {
+                  type: "ColumnSet",
+                  columns: [
+                    {
+                      type: "Column",
+                      width: "stretch",
+                      items: [
+                        {
+                          type: "TextBlock",
+                          text: basePayload.user?.email || "Unknown User",
+                          wrap: true,
+                          weight: "Bolder"
+                        },
+                        {
+                          type: "TextBlock",
+                          text: basePayload.user?.accountType ? `Account: ${basePayload.user.accountType}` : "Account Type: Unknown",
+                          wrap: true,
+                          size: "Small",
+                          isSubtle: true,
+                          spacing: "None"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          verticalCellContentAlignment: "Center"
+        });
+
+        if (tableRows.length > 0) {
+          bodyElements.push({
+            type: "Table",
+            columns: [
+              { width: 2 },
+              { width: 3 }
+            ],
+            rows: tableRows,
+            firstRowAsHeaders: false,
+            showGridLines: false,
+            spacing: "Large",
+            separator: true
+          });
+        }
+
+        // Alert reason
+        if (data.reason) {
+          bodyElements.push({
+            type: "Container",
+            separator: true,
+            items: [
+              {
+                type: "TextBlock",
+                text: "Alert Details",
+                wrap: true,
+                isSubtle: true
+              },
+              {
+                type: "TextBlock",
+                text: data.reason,
+                wrap: true,
+                spacing: "None"
+              }
+            ]
+          });
+        }
+
+        const adaptiveCard = {
+          type: "AdaptiveCard",
+          $schema: "https://adaptivecards.io/schemas/adaptive-card.json",
+          version: "1.5",
+          body: bodyElements
+        };
+
+        if (type === "page_blocked" || type === "detection_alert") {
+          adaptiveCard.actions = [
+            {
+              type: "Action.OpenUrl",
+              title: "Investigate URL",
+              url: data.url
+            }
+          ];
+        }
+        
+        return {
+          type: "message",
+          attachments: [
+            {
+              contentType: "application/vnd.microsoft.card.adaptive",
+              contentUrl: null,
+              content: adaptiveCard
+            }
+          ]
+        };
+      }
+    };
+
+    function generateSample(format, eventType) {
+      const data = sampleData[eventType];
+      const formatted = formatters[format](eventType, data);
+      
+      const outputElement = document.getElementById(`${format}-output`);
+      const contentElement = document.getElementById(`${format}-content`);
+      
+      contentElement.textContent = JSON.stringify(formatted, null, 2);
+      outputElement.style.display = 'block';
+      
+      // Scroll to output
+      outputElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function sendTestWebhook(eventType) {
+      const url = document.getElementById('webhook-url').value;
+      const format = document.getElementById('webhook-format').value;
+      const statusElement = document.getElementById('webhook-status');
+      
+      if (!url) {
+        statusElement.innerHTML = '<div class="status error">Please enter a webhook URL</div>';
+        return;
+      }
+      
+      const data = sampleData[eventType];
+      const payload = formatters[format](eventType, data);
+      
+      statusElement.innerHTML = '<div class="status">Sending webhook...</div>';
+      
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Webhook-Type': eventType,
+            'X-Webhook-Version': '1.0'
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+          statusElement.innerHTML = `<div class="status success">✅ Webhook sent successfully! (${response.status})</div>`;
+        } else {
+          statusElement.innerHTML = `<div class="status error">❌ Webhook failed: ${response.status} ${response.statusText}</div>`;
+        }
+      } catch (error) {
+        statusElement.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

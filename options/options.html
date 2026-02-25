@@ -119,14 +119,14 @@
                     </div>
 
                     <div class="setting-group">
-                        <h3>Generic Webhook</h3>
+                        <h3>Webhook Notifications</h3>
                         <div class="setting-item">
                             <label class="setting-label">
                                 <input type="checkbox" id="genericWebhookEnabled" class="setting-checkbox">
                                 <span class="checkbox-custom"></span>
-                                Enable Generic Webhook
+                                Enable Webhook Notifications
                             </label>
-                            <p class="setting-description">Send events to a custom webhook endpoint</p>
+                            <p class="setting-description">Send security events to Slack, Teams, or custom endpoints</p>
                         </div>
 
                         <div class="setting-item">
@@ -135,6 +135,18 @@
                                 <input type="url" id="genericWebhookUrl" class="setting-input" placeholder="https://webhook.example.com/endpoint">
                             </label>
                             <p class="setting-description">URL to receive webhook payloads</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                Webhook Format
+                                <select id="genericWebhookFormat" class="setting-select">
+                                    <option value="json">JSON (Default)</option>
+                                    <option value="slack">Slack Block Kit</option>
+                                    <option value="teams">Microsoft Teams Adaptive Cards</option>
+                                </select>
+                            </label>
+                            <p class="setting-description">Message format - choose Slack or Teams for rich cards, or JSON for custom integrations.</p>
                         </div>
 
                         <div class="setting-item">

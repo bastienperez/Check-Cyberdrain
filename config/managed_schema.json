@@ -88,6 +88,17 @@
           "format": "uri",
           "default": ""
         },
+        "format": {
+          "title": "Webhook Format",
+          "description": "Format of the webhook payload",
+          "type": "string",
+          "enum": [
+            "json",
+            "slack",
+            "teams"
+          ],
+          "default": "json"
+        },
         "events": {
           "title": "Event Types",
           "description": "Array of event types to send to this webhook",

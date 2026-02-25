@@ -47,6 +47,7 @@ mechanism. Managed settings follow the schema in `config/managed_schema.json`.
   colors.
 - **Detection rules** – edit `rules/detection-rules.json` or enable remote
   rules using the `detectionRules` section in the policy schema.
+- **Webhooks** – configure webhook notifications with support for JSON, Slack, and Microsoft Teams formats. See `docs/webhook-formatting.md` for details.
 
 ## Contributing
 

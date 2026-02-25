@@ -866,6 +866,11 @@ class CheckOptions {
     this.elements.cippServerUrl = document.getElementById("cippServerUrl");
     this.elements.cippTenantId = document.getElementById("cippTenantId");
 
+    // Webhook notification elements
+    this.elements.genericWebhookEnabled = document.getElementById("genericWebhookEnabled");
+    this.elements.genericWebhookUrl = document.getElementById("genericWebhookUrl");
+    this.elements.genericWebhookFormat = document.getElementById("genericWebhookFormat");
+
     if (this.elements.enablePageBlocking) {
       this.elements.enablePageBlocking.checked =
         this.config?.enablePageBlocking !== false;
@@ -889,15 +894,15 @@ class CheckOptions {
     // Detection settings - use top-level customRulesUrl consistently
     this.elements.customRulesUrl.value = this.config?.customRulesUrl || "";
 
-    // Generic webhook settings
-    this.elements.genericWebhookEnabled = document.getElementById("genericWebhookEnabled");
-    this.elements.genericWebhookUrl = document.getElementById("genericWebhookUrl");
-    
+    // Webhook notification settings (elements already bound above)
     if (this.elements.genericWebhookEnabled) {
       this.elements.genericWebhookEnabled.checked = this.config?.genericWebhook?.enabled || false;
     }
     if (this.elements.genericWebhookUrl) {
       this.elements.genericWebhookUrl.value = this.config?.genericWebhook?.url || "";
+    }
+    if (this.elements.genericWebhookFormat) {
+      this.elements.genericWebhookFormat.value = this.config?.genericWebhook?.format || "json";
     }
 
     const eventTypes = [
@@ -1141,10 +1146,11 @@ class CheckOptions {
       customRulesUrl: this.elements.customRulesUrl?.value || "",
       updateInterval: parseInt(this.elements.updateInterval?.value || 24),
 
-      // Generic webhook
+      // Webhook notifications
       genericWebhook: {
         enabled: this.elements.genericWebhookEnabled?.checked || false,
         url: this.elements.genericWebhookUrl?.value || "",
+        format: this.elements.genericWebhookFormat?.value || "json",
         events: [
           "detection_alert",
           "false_positive_report",
@@ -2514,6 +2520,10 @@ class CheckOptions {
       urlAllowlist: this.elements.urlAllowlist,
       enableDebugLogging: this.elements.enableDebugLogging,
       // Note: enableDeveloperConsoleLogging is excluded - should remain available for debugging
+      // Webhook notification fields
+      "genericWebhook.enabled": this.elements.genericWebhookEnabled,
+      "genericWebhook.url": this.elements.genericWebhookUrl,
+      "genericWebhook.format": this.elements.genericWebhookFormat,
       // Branding fields (if customBranding policy is present)
       companyName: this.elements.companyName,
       companyURL: this.elements.companyURL,
@@ -2532,6 +2542,17 @@ class CheckOptions {
             this.disableFieldWithPolicy(
               element,
               `customBranding.${brandingKey}`
+            );
+          }
+        });
+      } else if (policyKey === "genericWebhook" && policies.genericWebhook) {
+        // Handle nested webhook policies
+        Object.keys(policies.genericWebhook).forEach((webhookKey) => {
+          const element = policyFieldMap[`genericWebhook.${webhookKey}`];
+          if (element) {
+            this.disableFieldWithPolicy(
+              element,
+              `genericWebhook.${webhookKey}`
             );
           }
         });
